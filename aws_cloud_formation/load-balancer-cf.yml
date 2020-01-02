@@ -1,0 +1,81 @@
+Description: This template deploys an Application Load Balancer that exposes our various ECS services.
+
+Parameters:
+  EnvironmentName:
+    Description: An environment name that will be prefixed to resource names
+    Type: String
+    Default: "engage-api"
+
+  VPC:
+    Description: Choose which VPC the Application Load Balancer should be deployed to
+    Type: String
+    Default: "vpc-0fa27b9839c86f4d8"
+
+  Subnets:
+    Description: Choose which subnets the Application Load Balancer should be deployed to
+    Type: CommaDelimitedList
+    Default: "subnet-0efd280d4daa53980, subnet-0e2db6c67869cf45f"
+
+  SecurityGroup:
+    Description: Select the Security Group to apply to the Application Load Balancer
+    Type: String
+    Default: "sg-05af4eb149c75308c"
+
+Resources:
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Ref EnvironmentName
+      Subnets: !Ref Subnets
+      IpAddressType: ipv4
+      SecurityGroups:
+        - !Ref SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Ref EnvironmentName
+
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref LoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          ForwardConfig:
+            TargetGroups:
+              - TargetGroupArn: !Ref TargetGroup80A
+                Weight: 1
+              - TargetGroupArn: !Ref TargetGroup80B
+                Weight: 1
+
+  TargetGroup80A:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${EnvironmentName}-1
+      VpcId: !Ref VPC
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+
+  TargetGroup80B:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${EnvironmentName}-2
+      VpcId: !Ref VPC
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+
+Outputs:
+  LoadBalancer:
+    Description: A reference to the Application Load Balancer
+    Value: !Ref LoadBalancer
+
+  LoadBalancerUrl:
+    Description: The URL of the ALB
+    Value: !GetAtt LoadBalancer.DNSName
+
+  Listener:
+    Description: A reference to a port 80 listener
+    Value: !Ref LoadBalancerListener

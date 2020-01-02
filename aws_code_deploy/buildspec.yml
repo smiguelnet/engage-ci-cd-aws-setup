@@ -1,0 +1,36 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws --version
+      - $(aws ecr get-login --region $AWS_DEFAULT_REGION --no-include-email)
+      - REPOSITORY_URI=[AWS_ECR_REPO].amazonaws.com/engage-api
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - PROJECT_FOLDER=3_Implementation/engage-api
+  install:
+    runtime-versions:
+      java: corretto11
+      docker: 18
+  build:
+    commands:
+      - echo NEW Build started on `date`
+      - echo Project folder `${PROJECT_FOLDER}`
+      - cd ${PROJECT_FOLDER} && mvn clean install -DskipTests -Pdocker
+      - echo Building the Docker image at `${PROJECT_FOLDER}`
+      - echo current_folder_path
+      - echo `pwd`
+      - docker build -t $REPOSITORY_URI:latest .
+      - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:$IMAGE_TAG
+artifacts:
+  files:
+    - ${PROJECT_FOLDER}/target/engage-api-0.8.5.jar
+  discard-paths: yes

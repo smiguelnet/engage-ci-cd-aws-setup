@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engage-api
+spec:
+  selector:
+    matchLabels:
+      app: engage-api
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: engage-api
+    spec:
+      containers:
+        - name: engage-api
+          image: smiguelnet/engage
+          env:
+            - name: WEBSERVER_PORT
+              value: "8080"
+            - name: MONGODB_URI
+              value: mongodb://[MONGO_URI_VALUE]
+          ports:
+            - containerPort: 8080

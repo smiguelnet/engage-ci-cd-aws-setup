@@ -1,0 +1,28 @@
+{
+  "taskDefinition": "ecs-engage-api:10",
+  "cluster": "engage-api-cluster",
+  "loadBalancers": [{
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:863043710130:targetgroup/engage-api-1/e24c6946f6c5bbc2",
+      "containerName": "engage-api",
+      "containerPort": 80
+    },
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:us-east-1:863043710130:targetgroup/engage-api-2/d38fe92280b70432",
+      "containerName": "engage-api",
+      "containerPort": 80
+    }
+  ],
+  "desiredCount": 2,
+  "launchType": "FARGATE",
+  "schedulingStrategy": "REPLICA",
+  "deploymentController": {
+    "type": "CODE_DEPLOY"
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-0efd280d4daa53980", "subnet-0e2db6c67869cf45f"],
+      "securityGroups": ["sg-05af4eb149c75308c"],
+      "assignPublicIp": "ENABLED"
+    }
+  }
+}

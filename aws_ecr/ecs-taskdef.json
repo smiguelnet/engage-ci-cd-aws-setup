@@ -1,0 +1,43 @@
+{
+  "executionRoleArn": "[ARN_ROLE_ACCORDING_AWS_IAM_Setup.md]",
+  "containerDefinitions": [
+    {
+      "name": "engage-api",
+      "image": "[AWS_ECR_REPO]/engage-api:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "hostPort": 80,
+          "protocol": "tcp",
+          "containerPort": 80
+        },
+        {
+          "hostPort": 8080,
+          "protocol": "tcp",
+          "containerPort": 8080
+        }
+      ],
+      "environment": [
+        {
+          "name": "WEBSERVER_PORT",
+          "value": "80"
+        },
+        {
+          "name": "MONGODB_URI",
+          "value": "mongodb://[MONGO_URI_VALUE]"
+        },
+        {
+          "name": "PROFILES",
+          "value": "default"
+        }
+      ],
+      "workingDirectory": "/home/service",
+      "entryPoint": ["java", "-jar", "/home/service/engage-api.jar"]
+    }
+  ],
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "family": "ecs-engage-api"
+}
