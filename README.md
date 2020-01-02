@@ -50,13 +50,13 @@ aws ecs register-task-definition --cli-input-json file://ecs-taskdef.json
 
 ## Validation Steps
 
-1. List Created Services
+1. List of Created Services
 
 ```sh
 aws ecs list-services --cluster engage-api-cluster
 ```
 
-2. Describe de Cluster
+2. Describe the Cluster
 
 ```sh
 aws ecs describe-services --cluster engage-api-cluster --services engage-api-service
